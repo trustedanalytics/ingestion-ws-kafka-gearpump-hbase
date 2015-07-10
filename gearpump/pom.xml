@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.trustedanalytics.ingestion.gearpump</groupId>
+    <artifactId>gearpump-app</artifactId>
+    <version>0.4.3-SNAPSHOT</version>
+    <properties>
+        <gearpumpVersion>0.7.4</gearpumpVersion>
+    </properties>
+
+    <repositories>
+
+        <repository>
+            <id>sonatype-nexus-releases</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+
+        <repository>
+            <id>gearpump-shaded-repo</id>
+            <name>Vincent at Bintray</name>
+            <url>http://dl.bintray.com/fvunicorn/maven</url>
+        </repository>
+
+        <repository>
+            <id>releases-oss.sonatype.org</id>
+            <name>Sonatype Releases Repository</name>
+            <url>http://oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
+
+        <repository>
+            <id>akka-data-replication</id>
+            <name>Patrik at Bintray</name>
+            <url>http://dl.bintray.com/patriknw/maven</url>
+        </repository>
+
+        <repository>
+            <id>cloudera</id>
+            <name>Cloudera repo</name>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+        </repository>
+
+        <repository>
+            <id>vincent</id>
+            <name>vincent</name>
+            <url>http://dl.bintray.com/fvunicorn/maven</url>
+        </repository>
+
+        <repository>
+            <id>non</id>
+            <name>non</name>
+            <url>http://dl.bintray.com/non/maven</url>
+        </repository>
+
+        <repository>
+            <id>maven-repo</id>
+            <name>maven-repo</name>
+            <url>http://repo.maven.apache.org/maven2</url>
+        </repository>
+
+        <repository>
+            <id>maven1-repo</id>
+            <name>maven1-repo</name>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+
+        <repository>
+            <id>maven2-repo</id>
+            <name>maven2-repo</name>
+            <url>http://mvnrepository.com/artifact</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.intel-hadoop</groupId>
+            <artifactId>gearpump-core_2.11</artifactId>
+            <version>${gearpumpVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.intel-hadoop</groupId>
+            <artifactId>gearpump-streaming_2.11</artifactId>
+            <version>${gearpumpVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.intel-hadoop</groupId>
+            <artifactId>gearpump-external-kafka_2.11</artifactId>
+            <version>${gearpumpVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.intel-hadoop</groupId>
+            <artifactId>gearpump-external-hbase_2.11</artifactId>
+            <version>${gearpumpVersion}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>16.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.10</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <outputDirectory>${project.build.outputDirectory}/resources</outputDirectory>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.trustedanalytics.ingestion.gearpump.PipelineApp</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
