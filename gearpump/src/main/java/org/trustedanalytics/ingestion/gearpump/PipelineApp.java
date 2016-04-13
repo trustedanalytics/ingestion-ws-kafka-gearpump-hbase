@@ -17,7 +17,7 @@
 
 package org.trustedanalytics.ingestion.gearpump;
 
-import io.gearpump.cluster.ClusterConfigSource;
+import com.typesafe.config.Config;
 import io.gearpump.cluster.UserConfig;
 import io.gearpump.cluster.client.ClientContext;
 import io.gearpump.partitioner.HashPartitioner;
@@ -29,6 +29,7 @@ import io.gearpump.streaming.javaapi.StreamApplication;
 import io.gearpump.streaming.kafka.KafkaSink;
 import io.gearpump.streaming.kafka.KafkaSource;
 import io.gearpump.streaming.kafka.KafkaStorageFactory;
+import io.gearpump.cluster.ClusterConfig;
 import org.trustedanalytics.ingestion.gearpump.converters.ByteArray2StringTask;
 import org.trustedanalytics.ingestion.gearpump.converters.String2Tuple2Task;
 import org.trustedanalytics.ingestion.gearpump.processors.LogMessageTask;
@@ -36,22 +37,43 @@ import org.trustedanalytics.ingestion.gearpump.processors.ReverseStringTask;
 
 public class PipelineApp {
 
-    public static final String KAFKA_TOPIC_IN = "topic1";
-    public static final String KAFKA_TOPIC_OUT = "topic2";
-    public static final String KAFKA_SERVERS = "localhost:9092";
-    public static final String ZOOKEEPER_QUORUM = "localhost:2181";
-    public static final String TABLE_NAME = "pipeline";
-    public static final String COLUMN_FAMILY = "message";
+    public static String KAFKA_TOPIC_IN;
+    public static String KAFKA_TOPIC_OUT;
+    public static String KAFKA_SERVERS;
+    public static String ZOOKEEPER_QUORUM;
+    public static String KAFKA_ZOOKEEPER_QUORUM;
+    public static String TABLE_NAME;
+    public static String COLUMN_FAMILY;
 
     public static void main(String[] args) {
+        main(ClusterConfig.defaultConfig(), args);
+    }
+
+    public static void main(Config akkaConf, String[] args) {
         ClientContext context = ClientContext.apply();
         UserConfig appConfig = UserConfig.empty();
+
+        KAFKA_TOPIC_IN = akkaConf.getString("tap.usersArgs.inputTopic");
+        KAFKA_TOPIC_OUT = akkaConf.getString("tap.usersArgs.outputTopic");
+        KAFKA_SERVERS = akkaConf.getConfigList("tap.kafka").get(0).getString("credentials.uri");
+        ZOOKEEPER_QUORUM = akkaConf.getConfigList("tap.hbase").get(0).getString("credentials.HADOOP_CONFIG_KEY.\"hbase.zookeeper.quorum\"");
+        KAFKA_ZOOKEEPER_QUORUM = akkaConf.getConfigList("tap.kafka").get(0).getString("credentials.zookeeperUri");
+        TABLE_NAME = akkaConf.getString("tap.usersArgs.tableName");
+        COLUMN_FAMILY = akkaConf.getString("tap.usersArgs.columnFamily");
+
+        System.out.println("KAFKA_TOPIC_IN: " + KAFKA_TOPIC_IN);
+        System.out.println("KAFKA_TOPIC_OUT: " + KAFKA_TOPIC_OUT);
+        System.out.println("KAFKA_SERVERS: " + KAFKA_SERVERS);
+        System.out.println("ZOOKEEPER_QUORUM: " + ZOOKEEPER_QUORUM);
+        System.out.println("KAFKA_ZOOKEEPER_QUORUM: " + KAFKA_ZOOKEEPER_QUORUM);
+        System.out.println("TABLE_NAME: " + TABLE_NAME);
+        System.out.println("COLUMN_FAMILY: " + COLUMN_FAMILY);
 
         int taskNumber = 1;
 
         // kafka source
-        KafkaStorageFactory offsetStorageFactory = new KafkaStorageFactory(ZOOKEEPER_QUORUM, KAFKA_SERVERS);
-        KafkaSource kafkaSource = new KafkaSource(KAFKA_TOPIC_IN, ZOOKEEPER_QUORUM, offsetStorageFactory);
+        KafkaStorageFactory offsetStorageFactory = new KafkaStorageFactory(KAFKA_ZOOKEEPER_QUORUM, KAFKA_SERVERS);
+        KafkaSource kafkaSource = new KafkaSource(KAFKA_TOPIC_IN, KAFKA_ZOOKEEPER_QUORUM, offsetStorageFactory);
         Processor sourceProcessor = Processor.source(kafkaSource, taskNumber, "kafkaSource", appConfig, context.system());
 
         // converter (converts byte[] message to String -- kafka produces byte[]
@@ -77,7 +99,6 @@ public class PipelineApp {
             .withString(HBaseSinkTask.COLUMN_FAMILY, COLUMN_FAMILY);
         Processor hbaseSinkProcessor = new Processor(HBaseSinkTask.class, taskNumber, "hbaseSink", config);
 
-        new ClusterConfigSource.ClusterConfigSourceImpl(null);
         Graph graph = new Graph();
         graph.addVertex(sourceProcessor);
         graph.addVertex(convert2string);
