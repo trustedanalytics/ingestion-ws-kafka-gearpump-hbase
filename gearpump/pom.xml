@@ -6,7 +6,7 @@
 
     <groupId>org.trustedanalytics.ingestion.gearpump</groupId>
     <artifactId>gearpump-app</artifactId>
-    <version>0.4.4</version>
+    <version>0.5.0</version>
     <properties>
         <gearpumpVersion>0.8.0</gearpumpVersion>
     </properties>
@@ -41,12 +41,6 @@
             <id>cloudera</id>
             <name>Cloudera repo</name>
             <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
-        </repository>
-
-        <repository>
-            <id>vincent</id>
-            <name>vincent</name>
-            <url>http://dl.bintray.com/fvunicorn/maven</url>
         </repository>
 
         <repository>
