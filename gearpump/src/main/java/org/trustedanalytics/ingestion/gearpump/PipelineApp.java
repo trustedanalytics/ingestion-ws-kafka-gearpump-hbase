@@ -37,13 +37,13 @@ import org.trustedanalytics.ingestion.gearpump.processors.ReverseStringTask;
 
 public class PipelineApp {
 
-    public static String KAFKA_TOPIC_IN;
-    public static String KAFKA_TOPIC_OUT;
-    public static String KAFKA_SERVERS;
-    public static String ZOOKEEPER_QUORUM;
-    public static String KAFKA_ZOOKEEPER_QUORUM;
-    public static String TABLE_NAME;
-    public static String COLUMN_FAMILY;
+    private static String KAFKA_TOPIC_IN;
+    private static String KAFKA_TOPIC_OUT;
+    private static String KAFKA_SERVERS;
+    private static String ZOOKEEPER_QUORUM;
+    private static String KAFKA_ZOOKEEPER_QUORUM;
+    private static String TABLE_NAME;
+    private static String COLUMN_FAMILY;
 
     public static void main(String[] args) {
         main(ClusterConfig.defaultConfig(), args);
@@ -53,21 +53,13 @@ public class PipelineApp {
         ClientContext context = ClientContext.apply();
         UserConfig appConfig = UserConfig.empty();
 
-        KAFKA_TOPIC_IN = akkaConf.getString("tap.usersArgs.inputTopic");
-        KAFKA_TOPIC_OUT = akkaConf.getString("tap.usersArgs.outputTopic");
-        KAFKA_SERVERS = akkaConf.getConfigList("tap.kafka").get(0).getString("credentials.uri");
-        ZOOKEEPER_QUORUM = akkaConf.getConfigList("tap.hbase").get(0).getString("credentials.HADOOP_CONFIG_KEY.\"hbase.zookeeper.quorum\"");
-        KAFKA_ZOOKEEPER_QUORUM = akkaConf.getConfigList("tap.kafka").get(0).getString("credentials.zookeeperUri");
-        TABLE_NAME = akkaConf.getString("tap.usersArgs.tableName");
-        COLUMN_FAMILY = akkaConf.getString("tap.usersArgs.columnFamily");
-
-        System.out.println("KAFKA_TOPIC_IN: " + KAFKA_TOPIC_IN);
-        System.out.println("KAFKA_TOPIC_OUT: " + KAFKA_TOPIC_OUT);
-        System.out.println("KAFKA_SERVERS: " + KAFKA_SERVERS);
-        System.out.println("ZOOKEEPER_QUORUM: " + ZOOKEEPER_QUORUM);
-        System.out.println("KAFKA_ZOOKEEPER_QUORUM: " + KAFKA_ZOOKEEPER_QUORUM);
-        System.out.println("TABLE_NAME: " + TABLE_NAME);
-        System.out.println("COLUMN_FAMILY: " + COLUMN_FAMILY);
+        try {
+            extractParameters(akkaConf);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            System.err.println("Check input parameters.");
+            throw new IllegalArgumentException("Check input parameters.", e);
+        }
 
         int taskNumber = 1;
 
@@ -124,5 +116,23 @@ public class PipelineApp {
 
         // clean resource
         context.close();
+    }
+
+    private static void extractParameters(Config akkaConf) {
+        KAFKA_TOPIC_IN = akkaConf.getString("tap.usersArgs.inputTopic");
+        KAFKA_TOPIC_OUT = akkaConf.getString("tap.usersArgs.outputTopic");
+        KAFKA_SERVERS = akkaConf.getConfigList("tap.kafka").get(0).getString("credentials.uri");
+        ZOOKEEPER_QUORUM = akkaConf.getConfigList("tap.hbase").get(0).getString("credentials.HADOOP_CONFIG_KEY.\"hbase.zookeeper.quorum\"");
+        KAFKA_ZOOKEEPER_QUORUM = akkaConf.getConfigList("tap.kafka").get(0).getString("credentials.zookeeperUri");
+        TABLE_NAME = akkaConf.getString("tap.usersArgs.tableName");
+        COLUMN_FAMILY = akkaConf.getString("tap.usersArgs.columnFamily");
+
+        System.out.println("KAFKA_TOPIC_IN: " + KAFKA_TOPIC_IN);
+        System.out.println("KAFKA_TOPIC_OUT: " + KAFKA_TOPIC_OUT);
+        System.out.println("KAFKA_SERVERS: " + KAFKA_SERVERS);
+        System.out.println("ZOOKEEPER_QUORUM: " + ZOOKEEPER_QUORUM);
+        System.out.println("KAFKA_ZOOKEEPER_QUORUM: " + KAFKA_ZOOKEEPER_QUORUM);
+        System.out.println("TABLE_NAME: " + TABLE_NAME);
+        System.out.println("COLUMN_FAMILY: " + COLUMN_FAMILY);
     }
 }
