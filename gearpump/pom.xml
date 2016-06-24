@@ -6,9 +6,10 @@
 
     <groupId>org.trustedanalytics.ingestion.gearpump</groupId>
     <artifactId>gearpump-app</artifactId>
-    <version>0.5.2</version>
+    <version>0.6.0</version>
     <properties>
         <gearpumpVersion>0.8.0</gearpumpVersion>
+        <!--  <hbase.version>1.2.1</hbase.version>-->
     </properties>
 
     <repositories>
@@ -87,10 +88,17 @@
             <version>${gearpumpVersion}</version>
         </dependency>
         <dependency>
+            <groupId>org.trustedanalytics</groupId>
+            <artifactId>hadoop-utils</artifactId>
+            <version>0.5.9</version>
+        </dependency>
+
+
+        <!--<dependency>
             <groupId>com.github.intel-hadoop</groupId>
             <artifactId>gearpump-external-hbase_2.11</artifactId>
             <version>${gearpumpVersion}</version>
-        </dependency>
+        </dependency> -->
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -117,6 +125,11 @@
             <artifactId>commons-codec</artifactId>
             <version>1.10</version>
         </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.11.8</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -130,6 +143,14 @@
                     <target>1.7</target>
                     <fork>true</fork>
                 </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -175,10 +196,10 @@
                     </headerDefinitions>
 
                     <header>license/license_header_2016.txt</header>
-		    <validHeaders>
-		        <validHeader>license/license_header_2015.txt</validHeader>
-		        <validHeader>license/license_header_2016.txt</validHeader>
-		    </validHeaders>
+                    <validHeaders>
+                        <validHeader>license/license_header_2015.txt</validHeader>
+                        <validHeader>license/license_header_2016.txt</validHeader>
+                    </validHeaders>
 
                     <includes>
                         <include>src/**/*.java</include>
@@ -198,7 +219,28 @@
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                  <groupId>net.alchim31.maven</groupId>
+                  <artifactId>scala-maven-plugin</artifactId>
+                  <version>3.2.1</version>
+                  <executions>
+                      <execution>
+                          <id>scala-compile-first</id>
+                          <phase>process-resources</phase>
+                          <goals>
+                                <goal>add-source</goal>
+                                <goal>compile</goal>
+                          </goals>
+                         </execution>
+                         <execution>
+                             <id>scala-test-compile</id>
+                             <phase>process-test-resources</phase>
+                             <goals>
+                                 <goal>testCompile</goal>
+                             </goals>
+                         </execution>
+                    </executions>
+            </plugin>
         </plugins>
     </build>
 

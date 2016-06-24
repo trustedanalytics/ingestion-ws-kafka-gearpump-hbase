@@ -33,6 +33,7 @@ public class HBaseSinkTask extends Task {
     public static String COLUMN_FAMILY = "hbase.table.column.family";
     public static String COLUMN_NAME = "hbase.table.column.name";
     public static String ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum";
+    public static String HBASE_USER = "hbase.user";
 
 
     private HBaseSink sink;
@@ -51,7 +52,7 @@ public class HBaseSinkTask extends Task {
         Configuration hbaseConf = new Configuration();
         hbaseConf.set(ZOOKEEPER_QUORUM, zkQuorum);
 
-        sink = new HBaseSink(UserConfig.empty(), tableName, hbaseConf);
+        sink = new HBaseSink(userConf, tableName, hbaseConf);
     }
 
     @Override

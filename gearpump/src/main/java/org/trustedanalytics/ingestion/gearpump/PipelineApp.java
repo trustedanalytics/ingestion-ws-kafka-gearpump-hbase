@@ -44,6 +44,7 @@ public class PipelineApp {
     private static String KAFKA_ZOOKEEPER_QUORUM;
     private static String TABLE_NAME;
     private static String COLUMN_FAMILY;
+    private static String HBASE_USER;
 
     public static void main(String[] args) {
         main(ClusterConfig.defaultConfig(), args);
@@ -88,7 +89,8 @@ public class PipelineApp {
         UserConfig config = UserConfig.empty()
             .withString(HBaseSinkTask.ZOOKEEPER_QUORUM, ZOOKEEPER_QUORUM)
             .withString(HBaseSinkTask.TABLE_NAME, TABLE_NAME)
-            .withString(HBaseSinkTask.COLUMN_FAMILY, COLUMN_FAMILY);
+            .withString(HBaseSinkTask.COLUMN_FAMILY, COLUMN_FAMILY)
+            .withString(HBaseSinkTask.HBASE_USER, HBASE_USER);
         Processor hbaseSinkProcessor = new Processor(HBaseSinkTask.class, taskNumber, "hbaseSink", config);
 
         Graph graph = new Graph();
@@ -126,6 +128,7 @@ public class PipelineApp {
         KAFKA_ZOOKEEPER_QUORUM = akkaConf.getConfigList("tap.kafka").get(0).getString("credentials.zookeeperUri");
         TABLE_NAME = akkaConf.getString("tap.usersArgs.tableName");
         COLUMN_FAMILY = akkaConf.getString("tap.usersArgs.columnFamily");
+        HBASE_USER = akkaConf.getString("tap.usersArgs.hbaseUser");
 
         System.out.println("KAFKA_TOPIC_IN: " + KAFKA_TOPIC_IN);
         System.out.println("KAFKA_TOPIC_OUT: " + KAFKA_TOPIC_OUT);
@@ -134,5 +137,6 @@ public class PipelineApp {
         System.out.println("KAFKA_ZOOKEEPER_QUORUM: " + KAFKA_ZOOKEEPER_QUORUM);
         System.out.println("TABLE_NAME: " + TABLE_NAME);
         System.out.println("COLUMN_FAMILY: " + COLUMN_FAMILY);
+        System.out.println("HBASE_USER: " + HBASE_USER);
     }
 }
