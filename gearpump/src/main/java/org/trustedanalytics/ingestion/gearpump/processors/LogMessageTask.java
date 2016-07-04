@@ -27,27 +27,27 @@ import org.slf4j.Logger;
 public class LogMessageTask extends Task {
 
     private TaskContext context;
-    private UserConfig userConf;
 
-    private Logger LOG = super.LOG();
+    private Logger LOGGER = super.LOG();
 
     public LogMessageTask(TaskContext taskContext, UserConfig userConf) {
         super(taskContext, userConf);
         this.context = taskContext;
-        this.userConf = userConf;
     }
 
     private Long now() {
         return System.currentTimeMillis();
     }
 
-    @Override public void onStart(StartTime startTime) {
-        LOG.info("LogMessageTask.onStart startTime [" + startTime + "]");
+    @Override
+    public void onStart(StartTime startTime) {
+        LOGGER.info("LogMessageTask.onStart startTime [" + startTime + "]");
     }
 
-    @Override public void onNext(Message message) {
-        LOG.info("LogMessageTask.onNext message = [" + message + "]");
-        LOG.info("message.msg class" + message.msg().getClass().getCanonicalName());
+    @Override
+    public void onNext(Message message) {
+        LOGGER.info("LogMessageTask.onNext message = [" + message + "]");
+        LOGGER.debug("message.msg class" + message.msg().getClass().getCanonicalName());
         context.output(new Message(message.msg(), now()));
     }
 }

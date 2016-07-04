@@ -30,44 +30,37 @@ import io.gearpump.streaming.kafka.KafkaSink;
 import io.gearpump.streaming.kafka.KafkaSource;
 import io.gearpump.streaming.kafka.KafkaStorageFactory;
 import io.gearpump.cluster.ClusterConfig;
-import org.trustedanalytics.ingestion.gearpump.converters.ByteArray2StringTask;
-import org.trustedanalytics.ingestion.gearpump.converters.String2Tuple2Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.trustedanalytics.ingestion.gearpump.config.UserConfigMapper;
+import org.trustedanalytics.ingestion.gearpump.hbase.HBaseSink;
+import org.trustedanalytics.ingestion.gearpump.processors.ByteArray2StringTask;
+import org.trustedanalytics.ingestion.gearpump.processors.String2Tuple2Task;
 import org.trustedanalytics.ingestion.gearpump.processors.LogMessageTask;
 import org.trustedanalytics.ingestion.gearpump.processors.ReverseStringTask;
 
 public class PipelineApp {
 
-    private static String KAFKA_TOPIC_IN;
-    private static String KAFKA_TOPIC_OUT;
-    private static String KAFKA_SERVERS;
-    private static String ZOOKEEPER_QUORUM;
-    private static String KAFKA_ZOOKEEPER_QUORUM;
-    private static String TABLE_NAME;
-    private static String COLUMN_FAMILY;
-    private static String HBASE_USER;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PipelineApp.class);
 
-    public static void main(String[] args) {
-        main(ClusterConfig.defaultConfig(), args);
-    }
-
-    public static void main(Config akkaConf, String[] args) {
+    public static void main(String[] args) throws Exception {
+        Config akkaConf = ClusterConfig.defaultConfig();
         ClientContext context = ClientContext.apply();
-        UserConfig appConfig = UserConfig.empty();
+        UserConfig userConfig;
 
         try {
-            extractParameters(akkaConf);
+            userConfig = UserConfigMapper.toUserConfig(akkaConf);
         } catch (Exception e) {
-            System.err.println(e.getMessage());
-            System.err.println("Check input parameters.");
+            LOGGER.error("Check input parameters." + e.getMessage());
             throw new IllegalArgumentException("Check input parameters.", e);
         }
 
         int taskNumber = 1;
 
         // kafka source
-        KafkaStorageFactory offsetStorageFactory = new KafkaStorageFactory(KAFKA_ZOOKEEPER_QUORUM, KAFKA_SERVERS);
-        KafkaSource kafkaSource = new KafkaSource(KAFKA_TOPIC_IN, KAFKA_ZOOKEEPER_QUORUM, offsetStorageFactory);
-        Processor sourceProcessor = Processor.source(kafkaSource, taskNumber, "kafkaSource", appConfig, context.system());
+        KafkaStorageFactory offsetStorageFactory = new KafkaStorageFactory(userConfig.getString("KAFKA_ZOOKEEPER_QUORUM").get(), userConfig.getString("KAFKA_SERVERS").get());
+        KafkaSource kafkaSource = new KafkaSource(userConfig.getString("KAFKA_TOPIC_IN").get(), userConfig.getString("KAFKA_ZOOKEEPER_QUORUM").get(), offsetStorageFactory);
+        Processor sourceProcessor = Processor.source(kafkaSource, taskNumber, "kafkaSource", UserConfig.empty(), context.system());
 
         // converter (converts byte[] message to String -- kafka produces byte[]
         Processor convert2string = new Processor(ByteArray2StringTask.class, taskNumber, "converter1", null);
@@ -82,16 +75,18 @@ public class PipelineApp {
         Processor forward = new Processor(LogMessageTask.class, taskNumber, "forwarder", null);
 
         // kafka sink (another kafka topic)
-        KafkaSink kafkaSink = new KafkaSink(KAFKA_TOPIC_OUT, KAFKA_SERVERS);
-        Processor kafkaSinkProcessor = Processor.sink(kafkaSink, taskNumber, "kafkaSink", appConfig, context.system());
+        KafkaSink kafkaSink = new KafkaSink(userConfig.getString("KAFKA_TOPIC_OUT").get(), userConfig.getString("KAFKA_SERVERS").get());
+        Processor kafkaSinkProcessor = Processor.sink(kafkaSink, taskNumber, "kafkaSink", UserConfig.empty(), context.system());
 
-        // hbase sink
-        UserConfig config = UserConfig.empty()
-            .withString(HBaseSinkTask.ZOOKEEPER_QUORUM, ZOOKEEPER_QUORUM)
-            .withString(HBaseSinkTask.TABLE_NAME, TABLE_NAME)
-            .withString(HBaseSinkTask.COLUMN_FAMILY, COLUMN_FAMILY)
-            .withString(HBaseSinkTask.HBASE_USER, HBASE_USER);
-        Processor hbaseSinkProcessor = new Processor(HBaseSinkTask.class, taskNumber, "hbaseSink", config);
+        HBaseSink hBaseSink;
+        try {
+            hBaseSink = new HBaseSink(userConfig);
+        } catch (Exception e) {
+            LOGGER.error("Exception during sink creation " + e.getMessage());
+            throw new Exception(e);
+        }
+
+        Processor hbaseSinkProcessor = Processor.sink(hBaseSink, taskNumber, "hbaseSink", UserConfig.empty(), context.system());
 
         Graph graph = new Graph();
         graph.addVertex(sourceProcessor);
@@ -113,30 +108,12 @@ public class PipelineApp {
         graph.addEdge(convert2tuple, partitioner, kafkaSinkProcessor);
 
         // submit
-        StreamApplication app = new StreamApplication("kafka2hbase", appConfig, graph);
+        StreamApplication app = new StreamApplication("kafka2hbase", UserConfig.empty(), graph);
         context.submit(app);
 
         // clean resource
         context.close();
     }
 
-    private static void extractParameters(Config akkaConf) {
-        KAFKA_TOPIC_IN = akkaConf.getString("tap.usersArgs.inputTopic");
-        KAFKA_TOPIC_OUT = akkaConf.getString("tap.usersArgs.outputTopic");
-        KAFKA_SERVERS = akkaConf.getConfigList("tap.kafka").get(0).getString("credentials.uri");
-        ZOOKEEPER_QUORUM = akkaConf.getConfigList("tap.hbase").get(0).getString("credentials.HADOOP_CONFIG_KEY.\"hbase.zookeeper.quorum\"");
-        KAFKA_ZOOKEEPER_QUORUM = akkaConf.getConfigList("tap.kafka").get(0).getString("credentials.zookeeperUri");
-        TABLE_NAME = akkaConf.getString("tap.usersArgs.tableName");
-        COLUMN_FAMILY = akkaConf.getString("tap.usersArgs.columnFamily");
-        HBASE_USER = akkaConf.getString("tap.usersArgs.hbaseUser");
 
-        System.out.println("KAFKA_TOPIC_IN: " + KAFKA_TOPIC_IN);
-        System.out.println("KAFKA_TOPIC_OUT: " + KAFKA_TOPIC_OUT);
-        System.out.println("KAFKA_SERVERS: " + KAFKA_SERVERS);
-        System.out.println("ZOOKEEPER_QUORUM: " + ZOOKEEPER_QUORUM);
-        System.out.println("KAFKA_ZOOKEEPER_QUORUM: " + KAFKA_ZOOKEEPER_QUORUM);
-        System.out.println("TABLE_NAME: " + TABLE_NAME);
-        System.out.println("COLUMN_FAMILY: " + COLUMN_FAMILY);
-        System.out.println("HBASE_USER: " + HBASE_USER);
-    }
 }

@@ -27,26 +27,26 @@ import org.slf4j.Logger;
 public class ReverseStringTask extends Task {
 
     private TaskContext context;
-    private UserConfig userConf;
 
-    private Logger LOG = super.LOG();
+    private Logger LOGGER = super.LOG();
 
     public ReverseStringTask(TaskContext taskContext, UserConfig userConf) {
         super(taskContext, userConf);
         this.context = taskContext;
-        this.userConf = userConf;
     }
 
     private Long now() {
         return System.currentTimeMillis();
     }
 
-    @Override public void onStart(StartTime startTime) {
-        LOG.info("LogMessageTask.onStart startTime [" + startTime + "]");
+    @Override 
+    public void onStart(StartTime startTime) {
+        LOGGER.info("LogMessageTask.onStart startTime [" + startTime + "]");
     }
 
-    @Override public void onNext(Message message) {
-        LOG.info("LogMessageTask.onNext message = [" + message + "]");
+    @Override 
+    public void onNext(Message message) {
+        LOGGER.info("LogMessageTask.onNext message = [" + message + "]");
 
         Object msg = message.msg();
 
@@ -54,7 +54,7 @@ public class ReverseStringTask extends Task {
             String reversed = new StringBuilder((String)msg).reverse().toString();
             context.output(new Message(reversed, now()));
         } else {
-            LOG.info("sending message as is.");
+            LOGGER.debug("sending message as is.");
             context.output(new Message(msg, now()));
         }
     }
