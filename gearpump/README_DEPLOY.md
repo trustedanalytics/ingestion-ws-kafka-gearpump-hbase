@@ -29,9 +29,12 @@ This example will use also: hbase-java-api-example, kafka2hdfs and ws2kafka appl
     - If you want to check, if topic has been created
        `kafka-topics --list --zookeeper <<ha.zookeeper.quorum>>`
 1. Create a table in hbase using hbase-java-api-example:
-    - `curl http://domain.and:port/api/tables -X POST -H "Content-Type: application/json" -d '{"tableName":"pipeline","columnFamilies":["message"]}'`
-     where domain.and:port is your real domain, for example:
-       `curl http://trustedanalytics.org:80/api/tables -X POST -H "Content-Type: application/json" -d '{"tableName":"pipeline","columnFamilies":["message"]}'`
+
+   `curl <protocol><hbase-reader-host>.<tap_domain.and:port>/api/tables -X POST -H "Content-Type: application/json" -d '{"tableName":"pipeline","columnFamilies":["message"]}'`
+
+    where 'hbase-reader-host' is defined in manifest.yml of hbase-java-api-example app, 'tap_domain.and:port' is your TAP domain, e.g.:
+
+   `curl http://hbase-reader.trustedanalytics.org:80/api/tables -X POST -H "Content-Type: application/json" -d '{"tableName":"pipeline","columnFamilies":["message"]}'`
 1. Create GearPump instance or deploy on existing one
     - In TAP console, go to Data Science > GearPump tab,
     - If you don’t have an instance, you can create it right now,
@@ -54,11 +57,14 @@ This example will use also: hbase-java-api-example, kafka2hdfs and ws2kafka appl
 ## Automated deployment
 * Deploy applications needed by the flow to work (when deploying remember to provide the params to match the params given automatically to the app being deployed to Gearpump):
     * Deploy ws2kafka app on TAP platform using automated deployment procedure described here: https://github.com/trustedanalytics/ingestion-ws-kafka-hdfs/blob/master/ws2kafka/README.md
-    * Deploy hbase-java-api-example app on TAP platform using automated deployment procedure described here: https://github.com/intel-data/hbase-java-api-example/blob/master/README.md
-         - After deploument create a table in hbase using hbase-java-api-example:
-             `curl http://domain.and:port/api/tables -X POST -H "Content-Type: application/json" -d '{"tableName":"pipeline","columnFamilies":["message"]}'`
-              where domain.and:port is your real domain, for example:
-                `curl http://trustedanalytics.org:80/api/tables -X POST -H "Content-Type: application/json" -d '{"tableName":"pipeline","columnFamilies":["message"]}'`
+    * Deploy hbase-java-api-example app on TAP platform using automated deployment procedure described here: https://github.com/trustedanalytics/hbase-java-api-example/blob/master/README.md
+         - After deployment create a table in hbase using hbase-java-api-example:
+
+             `curl <protocol><hbase-reader-host>.<tap_domain.and:port>/api/tables -X POST -H "Content-Type: application/json" -d '{"tableName":"pipeline","columnFamilies":["message"]}'`
+
+              where 'hbase-reader-host' is defined in manifest.yml of hbase-java-api-example app, 'tap_domain.and:port' is your TAP domain, e.g.:
+
+              `curl http://hbase-reader.trustedanalytics.org:80/api/tables -X POST -H "Content-Type: application/json" -d '{"tableName":"pipeline","columnFamilies":["message"]}'`
     * Deploy kafka2hdfs app on TAP platform using automated deployment procedure described here: https://github.com/trustedanalytics/ingestion-ws-kafka-hdfs/blob/master/kafka2hdfs/README.md
 * Switch to `/gearpump/deploy` directory: `cd gearpump/deploy`
 * Install tox: `sudo -E pip install --upgrade tox`
@@ -75,6 +81,3 @@ Application will be deployed with predefined extra parameters:
 * **outputTopic**: topicOut
 * **tableName**: pipeline
 * **columnFamily**: message
-
-curl http://domain.and:port/api/tables -X POST -H "Content-Type: application/json" -d '{"tableName":"pipeline","columnFamilies":["message"]}'
- 
