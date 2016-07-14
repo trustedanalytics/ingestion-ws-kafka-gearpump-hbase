@@ -51,7 +51,7 @@ public class PipelineApp {
         try {
             userConfig = UserConfigMapper.toUserConfig(akkaConf);
         } catch (Exception e) {
-            LOGGER.error("Check input parameters." + e.getMessage());
+            LOGGER.error("Check input parameters. {}", e.getMessage());
             throw new IllegalArgumentException("Check input parameters.", e);
         }
 
@@ -82,7 +82,7 @@ public class PipelineApp {
         try {
             hBaseSink = new HBaseSink(userConfig);
         } catch (Exception e) {
-            LOGGER.error("Exception during sink creation " + e.getMessage());
+            LOGGER.error("Exception during sink creation {}", e.getMessage());
             throw new Exception(e);
         }
 

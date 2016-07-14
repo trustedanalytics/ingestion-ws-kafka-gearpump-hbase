@@ -67,7 +67,7 @@ public final class HBaseConnManager {
                 throw new IOException(e);
             }
         } else {
-            return ConnectionFactory.createConnection(hbaseConfiguration, getNoKrbUserFromSubject(hbaseConfiguration, userConfig.getString("hbase.user").get()));
+            return ConnectionFactory.createConnection(hbaseConfiguration, getNoKrbUserFromSubject(hbaseConfiguration, userConfig.getString("hbase.krb.user").get()));
         }
 
     }

@@ -59,7 +59,7 @@ public class String2Tuple2Task extends Task {
             Tuple2<byte[], byte[]> tuple = new Tuple2<>(key,value);
             context.output(new Message(tuple, now()));
         } catch (UnsupportedEncodingException e) {
-            LOGGER.warn("Problem converting message.", e);
+            LOGGER.warn("Problem converting message. {}", e);
             LOGGER.debug("sending message as is.");
             context.output(new Message(msg, now()));
         }

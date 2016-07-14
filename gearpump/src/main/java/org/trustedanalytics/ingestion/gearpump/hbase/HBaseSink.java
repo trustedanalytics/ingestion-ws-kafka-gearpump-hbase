@@ -68,7 +68,7 @@ public class HBaseSink implements DataSink {
         try {
             table.put(put);
         } catch (Exception e) {
-            LOGGER.error("HBASE SINK WRITE EXCEPTION ....", e);
+            LOGGER.error("HBASE SINK WRITE EXCEPTION .... {}", e);
             throw new RuntimeException("HBase write error occurred", e);
         }
     }
@@ -79,7 +79,7 @@ public class HBaseSink implements DataSink {
             table.close();
             connection.close();
         } catch (IOException e) {
-            LOGGER.error("HBASE SINK CLOSE EXCEPTION ....", e);
+            LOGGER.error("HBASE SINK CLOSE EXCEPTION .... {}", e);
             throw new RuntimeException("HBase close error occurred", e);
         }
 

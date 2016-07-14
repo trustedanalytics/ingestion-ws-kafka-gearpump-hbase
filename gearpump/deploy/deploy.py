@@ -66,8 +66,7 @@ DEPLOY_OUTPUT = gearpump_helpers.deploy_to_gearpump(GEARPUMP_DASHBOARD_URL,
                                                      "outputTopic":"topicOut",
                                                      "tableName":"pipeline",
                                                      "columnFamily":"message",
-                                                     "columnName":"message",
-                                                     "hbaseUser":"cf"},
-                                                    ["kafka-inst", "hbase1"])
+                                                     "columnName":"message"},
+                                                    ["kafka-inst", "hbase1, kerberos-inst"])
 
 logging.info(DEPLOY_OUTPUT)
