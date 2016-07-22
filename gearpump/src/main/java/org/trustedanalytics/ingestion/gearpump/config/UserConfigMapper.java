@@ -41,10 +41,12 @@ public class UserConfigMapper {
                 .withString("hbase.krb.user", appConfig.getConfigList("tap.kerberos").get(0).getString("credentials.kuser"))
                 .withString("hbase.krb.password", appConfig.getConfigList("tap.kerberos").get(0).getString("credentials.kpassword"))
                 .withString("hbase.krb.realm", appConfig.getConfigList("tap.kerberos").get(0).getString("credentials.krealm"))
-                .withString("hbase.krb.kdc", appConfig.getConfigList("tap.kerberos").get(0).getString("credentials.kdc"))
-                .withString("hbase.master.kerberos.principal", appConfig.getConfigList("tap.hbase").get(0).getString("credentials.HADOOP_CONFIG_KEY.\"hbase.master.kerberos.principal\""))
-                .withString("hbase.regionserver.kerberos.principal", appConfig.getConfigList("tap.hbase").get(0).getString("credentials.HADOOP_CONFIG_KEY.\"hbase.regionserver.kerberos.principal\""));
+                .withString("hbase.krb.kdc", appConfig.getConfigList("tap.kerberos").get(0).getString("credentials.kdc"));
 
+        if (userConfig.getBoolean("IS_KRB").get().equals(true)) {
+            userConfig = userConfig.withString("hbase.master.kerberos.principal", appConfig.getConfigList("tap.hbase").get(0).getString("credentials.HADOOP_CONFIG_KEY.\"hbase.master.kerberos.principal\""))
+                    .withString("hbase.regionserver.kerberos.principal", appConfig.getConfigList("tap.hbase").get(0).getString("credentials.HADOOP_CONFIG_KEY.\"hbase.regionserver.kerberos.principal\""));
+        }
         return userConfig;
     }
 }
