@@ -45,6 +45,7 @@ This example will use also: hbase-java-api-example, kafka2hdfs and ws2kafka appl
         * **outputTopic**: topicOut
         * **tableName**: pipeline
         * **columnFamily**: message
+        * **columnName**: message
     - Check hbase instance called “hbase1” and kafka instance “kafka-instance” from the list and deploy the application.
 1. Check if the information flow is working – messages should be visible in hbase:
        `curl http://domain.and:port/api/tables/pipeline/head`
@@ -81,3 +82,4 @@ Application will be deployed with predefined extra parameters:
 * **outputTopic**: topicOut
 * **tableName**: pipeline
 * **columnFamily**: message
+* **columnName**: message
